@@ -1,0 +1,51 @@
+// > 1.0-milestone-5 -
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'project-report'
+
+cayenneVersion = '3.0.2' // 3.1M3
+useMaven = true
+
+repositories {
+   // if ( useMaven ) {
+        mavenCentral()
+        mavenRepo urls: "http://objectstyle.org/maven2/"
+       // mavenRepo urls: "https://repository.apache.org/content/repositories/orgapachecayenne-052/" // snapshots
+   // } else {
+    flatDir ( name : 'lib' , dirs : 'lib' )
+   //}
+}
+
+
+// http://issues.gradle.org/browse/GRADLE-784
+configurations { modeler }
+//sourceSets {
+//  main { compileClasspath += configurations.provided }
+//  test { compileClasspath += configurations.provided }
+//  test { runtimeClasspath += configurations.provided }
+//}
+//eclipse.classpath.plusConfigurations += configurations.provided
+
+dependencies {
+    //groovy group: 'org.codehaus.groovy', name: 'groovy-all', version: '1.8.1'
+    groovy localGroovy()
+    compile 'org.apache.cayenne:cayenne-server:'+cayenneVersion
+    modeler 'org.apache.cayenne:cayenne-modeler:'+cayenneVersion
+    testCompile 'junit:junit:4.9'
+}
+
+// Cause: Could not resolve all dependencies for configuration ':modeler':
+//    - unresolved dependency: jgoodies#looks;1.3.1: not found - http://www.jgoodies.com/downloads/libraries.html
+//    - unresolved dependency: org.scopemvc#scopemvc;1.0.1: not found - http://scope.sourceforge.net/
+//    - unresolved dependency: foundrylogic.vpp#vpp;2.2.1: not found - http://vpp.sourceforge.net/
+// ==> http://objectstyle.org/maven2/
+
+task modeler {
+ def exit = javaexec{
+         classpath configurations.compile.asPath
+         //configurations.modeler.asPath
+         setMain "org.apache.cayenne.modeler.Main";
+ }
+ println "return value: ${exit.exitValue}"
+}
